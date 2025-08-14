@@ -26,6 +26,181 @@ HAE (Health Auto Export) からのデータを GitHub Actions で自動処理し
 
 ---
 
+## 🚧 **完成までの作業計画・ロードマップ**
+
+### 📅 **Phase A: GitHub環境セットアップ（約15分）**
+
+#### **A-1. GitHub Actionsワークフローファイル作成**
+```bash
+⏳ 作業状況: 準備中
+📄 ファイル: .github/workflows/health-process.yml
+🎯 目的: 定期実行・手動実行・データプッシュ実行の設定
+```
+
+**作業内容**:
+- [ ] `.github/workflows/` ディレクトリ作成
+- [ ] `health-process.yml` ワークフローファイル作成
+- [ ] 定期実行設定（毎日4回: 8:00, 12:00, 18:00, 22:00 JST）
+- [ ] 手動実行設定（workflow_dispatch）
+- [ ] データプッシュ実行設定（push trigger）
+
+#### **A-2. データディレクトリ構造作成**
+```bash
+⏳ 作業状況: 準備中
+📁 対象: health_api_data/, reports/
+🎯 目的: データ保存領域確保・初期ファイル配置
+```
+
+**作業内容**:
+- [ ] `health_api_data/` ディレクトリ作成
+- [ ] `reports/` ディレクトリ作成
+- [ ] `.gitkeep` ファイル配置（空ディレクトリ保持）
+- [ ] サンプルCSVファイル配置（オプション）
+
+### 📅 **Phase B: GitHub設定完了（約10分）**
+
+#### **B-1. GitHub Secrets環境変数設定（必須）**
+```bash
+⏳ 作業状況: 待機中（ユーザー作業）
+🔐 場所: Settings → Secrets and variables → Actions
+🎯 目的: LINE・OURA API認証情報設定
+```
+
+**設定項目**:
+- [ ] `LINE_BOT_CHANNEL_ACCESS_TOKEN`: `GGuEAJ5NWDI4TmcU2FdUp0pr+kTm+hh6d3Rsaxh1wOQVUgGAaBCB2zb68pADZbDlSjsekL3GyeXLldaXws+56ZbPURItuFUK4sH9yCP0S2m8F5cb29UKQyEBh5NGJPif1KdeHIAP1tEL5WOnchAa0wdB04t89/1O/w1cDnyilFU=`
+- [ ] `OURA_ACCESS_TOKEN`: `HWWGWQ6FD6TGJPNMQMG3NLXEDPKRR74I`
+- [ ] `LINE_USER_ID`: `U352695f9f7d6ee3e869b4b636f4e4864`
+
+#### **B-2. GitHub Actions権限設定**
+```bash
+⏳ 作業状況: 待機中（ユーザー作業）
+⚙️ 場所: Settings → Actions → General
+🎯 目的: ワークフロー実行・リポジトリ書き込み権限設定
+```
+
+**権限設定**:
+- [ ] **Actions permissions**: "Allow all actions and reusable workflows"
+- [ ] **Workflow permissions**: "Read and write permissions"
+- [ ] **Allow GitHub Actions to create and approve pull requests**: ✅有効
+
+### 📅 **Phase C: 動作テスト・確認（約20分）**
+
+#### **C-1. GitHub Actions初回実行テスト**
+```bash
+⏳ 作業状況: 待機中
+🚀 場所: Actions → Health Data Processing
+🎯 目的: ワークフロー正常動作確認
+```
+
+**テスト手順**:
+- [ ] **手動実行テスト**: Actions → Run workflow → 実行
+- [ ] **実行ログ確認**: 各ステップの正常完了確認
+- [ ] **エラー対処**: 環境変数・権限設定問題解決
+- [ ] **LINE通知確認**: テスト通知の受信確認
+
+#### **C-2. データ処理動作確認**
+```bash
+⏳ 作業状況: 待機中
+📊 対象: CSV生成・分析レポート生成
+🎯 目的: データ処理機能の完全動作確認
+```
+
+**確認項目**:
+- [ ] **CSVファイル生成**: `reports/daily_health_data.csv` 作成確認
+- [ ] **移動平均計算**: `reports/health_data_with_ma.csv` 作成確認
+- [ ] **分析レポート**: `reports/analysis_report_*.json` 作成確認
+- [ ] **Git自動コミット**: データ更新の自動コミット確認
+
+### 📅 **Phase D: HAE連携・運用開始（約15分）**
+
+#### **D-1. HAEアプリ送信先URL更新**
+```bash
+⏳ 作業状況: 待機中（ユーザー作業）
+📱 対象: HAE (Health Auto Export) アプリ
+🎯 目的: GitHub Actions Webhook URL設定
+```
+
+**設定手順**:
+- [ ] **HAEアプリ設定**: Railway URL → GitHub Repository API URL変更
+- [ ] **送信先URL**: `https://api.github.com/repos/bunya-gap/health-management-free/dispatches`
+- [ ] **認証設定**: GitHub Personal Access Token設定
+- [ ] **送信テスト**: HAEからのデータプッシュテスト実行
+
+#### **D-2. 定期実行・監視確認**
+```bash
+⏳ 作業状況: 待機中
+⏰ 対象: cron定期実行
+🎯 目的: 24時間自動稼働確認
+```
+
+**監視項目**:
+- [ ] **定期実行確認**: 次回cron実行時刻確認
+- [ ] **実行履歴確認**: Actions → ワークフロー実行履歴
+- [ ] **LINE通知確認**: 定期レポート受信確認
+- [ ] **エラー監視**: Failed実行の原因調査・対処
+
+### 📅 **Phase E: 最終検証・完成（約10分）**
+
+#### **E-1. 全機能統合テスト**
+```bash
+⏳ 作業状況: 待機中
+🎯 目的: Railway機能との完全同等性確認
+```
+
+**検証項目**:
+- [ ] **データ受信**: HAE → GitHub → ワークフロー起動
+- [ ] **データ変換**: JSON → CSV変換（24カラム）
+- [ ] **移動平均計算**: 7日/14日/28日移動平均
+- [ ] **健康分析**: 体脂肪率進捗・カロリー収支分析
+- [ ] **LINE通知**: 分析結果の即時配信
+- [ ] **データ保存**: Git履歴での永続化
+
+#### **E-2. 運用完成・Railway停止**
+```bash
+⏳ 作業状況: 待機中
+💰 目的: 完全無料化達成・月額費用削除
+```
+
+**完成作業**:
+- [ ] **GitHub Actions完全稼働確認**: 24時間連続動作確認
+- [ ] **機能同等性確認**: Railway版との機能比較確認
+- [ ] **データ移行完了**: Railway保存データのGitHub移行
+- [ ] **Railway サービス停止**: health-server-v3-integrated削除
+- [ ] **🎉 完成宣言**: 月額¥0無料システム運用開始
+
+---
+
+## 🎯 **現在の作業状況・進捗**
+
+### ✅ **完了済み項目**
+- ✅ **health_processor.py**: GitHub Actions対応統合プロセッサー (731行)
+- ✅ **README.md**: 包括的システムドキュメント
+- ✅ **requirements.txt**: Python依存関係定義
+- ✅ **GitHub リポジトリ**: health-management-free作成完了
+- ✅ **Phase1バグ修正**: 睡眠時間・糖質マッピング問題解決
+
+### 🔧 **現在作業中**
+- 🔧 **GitHub Actionsワークフロー**: `.github/workflows/health-process.yml`作成中
+
+### ⏳ **次の作業（依存関係順）**
+1. **ワークフローファイル作成完了** → MCP自動実行可能
+2. **データディレクトリ作成** → MCP自動実行可能  
+3. **GitHub Secrets設定** → **ユーザー手動作業必須**
+4. **GitHub Actions権限設定** → **ユーザー手動作業必須**
+5. **動作テスト実行** → MCP支援可能
+6. **HAE連携設定** → **ユーザー手動作業必須**
+7. **運用開始・Railway停止** → **ユーザー判断必須**
+
+### 📊 **作業完了予想時間**
+```
+🤖 MCP自動作業: 約5分（ワークフロー・ディレクトリ作成）
+👤 ユーザー手動作業: 約20分（設定・権限・テスト・HAE連携）
+⏱️ 合計想定時間: 約25分で完全移行完了
+💰 効果: 月額¥600-2000 → ¥0（年間最大¥24,000節約）
+```
+
+---
+
 ## 🏗️ システム構成
 
 ### アーキテクチャ

@@ -13,6 +13,10 @@ on:
         - 'manual'
         - 'full_analysis'
   
+  # HAE Webhook経由自動実行
+  repository_dispatch:
+    types: [hae_data_received, health_update]
+  
   # 定期実行（毎日 8:00, 12:00, 18:00, 22:00 JST）
   schedule:
     - cron: '0 23,3,9,13 * * *'  # UTC時間（JST-9時間）

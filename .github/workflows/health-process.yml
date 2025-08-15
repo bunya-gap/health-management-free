@@ -116,8 +116,8 @@ jobs:
           # 最新取得
           git fetch origin main
           
-          # 変更をステージング
-          git add reports/ health_api_data/
+          # 変更をステージング（health_api_dataは.gitignoreで除外のため対象外）
+          git add reports/
           
           # コミット実行
           if git commit -m "📊 健康データ自動更新 - $(date '+%Y-%m-%d %H:%M:%S') [GitHub Actions]"; then

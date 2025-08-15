@@ -198,6 +198,43 @@ exit 1: 処理失敗（分析失敗・LINE通知失敗等）
 
 ## 📈 プロジェクト履歴
 
+### 🚨 **2025年8月15日 - 新Git処理エラー発生・調査中**
+**GitHub Actions .gitignore競合エラー徹底調査プロジェクト**
+
+#### 🔍 **新エラー発覚**
+- ❌ **Git処理エラー継続**: 修正後も exit code 1 エラー発生
+- ❌ **原因変化**: rebaseエラー → .gitignore除外エラーに変化
+- ❌ **対象ディレクトリ**: health_api_data が.gitignoreで除外されている
+- ⚠️ **影響**: 健康データ処理は成功・Git同期のみ失敗
+
+#### 🔍 **エラーログ詳細**
+```
+The following paths are ignored by one of your .gitignore files:
+health_api_data
+hint: Use -f if you really want to add them.
+Error: Process completed with exit code 1.
+```
+
+#### 📊 **システム状況**
+- ✅ **健康データ処理**: 完全成功（体脂肪率17.2%表示）
+- ✅ **LINE通知**: 正常送信
+- ✅ **分析レポート**: 正常生成
+- ❌ **Git同期**: .gitignore競合エラー
+
+#### 🔄 **調査実行中**
+- **根本原因**: .gitignoreファイル設定とワークフロー設計不一致
+- **影響範囲**: データ永続化への影響調査
+- **解決方針**: .gitignore設定見直し vs ワークフロー修正
+- **調査責任者**: Claude + terada
+
+#### 📅 **調査予定**
+1. **.gitignoreファイル内容確認**
+2. **health_api_dataディレクトリ必要性調査**
+3. **データ永続化影響範囲分析**
+4. **最適解決策策定・実装**
+
+**🚨 調査継続中 - 健康システムは正常動作**
+
 ### 🔧 **2025年8月15日 - Gitエラー完全解消・ファイル整理完了**
 **体組成管理システム開発環境最適化プロジェクト**
 

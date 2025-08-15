@@ -377,6 +377,16 @@ class LineBotNotifier:
         target_bf = report.get('target_body_fat_rate', 12.0)
         progress = report.get('body_fat_progress', {})
         
+        # 安全な数値フォーマット関数
+        def safe_format(value, default=0):
+            return f"{float(value or default):.1f}"
+        
+        def safe_format_int(value, default=0):
+            return f"{int(float(value or default))}"
+        
+        body_comp = report.get('body_composition', {})
+        calorie_balance = report.get('calorie_balance', {})
+        
         message = f"""📊体脂肪率進捗 | {report.get('timestamp', 'N/A')}
 
 🎯 {current_bf:.1f}% 【GitHub Actions】
@@ -385,13 +395,13 @@ class LineBotNotifier:
 28日: {progress.get('28day_change', 0):+.1f}%  14日: {progress.get('14day_change', 0):+.1f}%  7日: {progress.get('7day_change', 0):+.1f}%
 
 💪体組成変化トレンド
-体重: {report.get('body_composition', {}).get('weight', 0):.1f}kg
-筋肉量: {report.get('body_composition', {}).get('muscle_mass', 0):.1f}kg
-体脂肪量: {report.get('body_composition', {}).get('body_fat_mass', 0):.1f}kg
+体重: {safe_format(body_comp.get('weight'))}kg
+筋肉量: {safe_format(body_comp.get('muscle_mass'))}kg
+体脂肪量: {safe_format(body_comp.get('body_fat_mass'))}kg
 
 🔥カロリー収支状況
-現在: {report.get('calorie_balance', {}).get('current', 0):.0f}kcal
-7日平均: {report.get('calorie_balance', {}).get('7day_avg', 0):.0f}kcal
+現在: {safe_format_int(calorie_balance.get('current'), 0)}kcal
+7日平均: {safe_format_int(calorie_balance.get('7day_avg'), 0)}kcal
 
 【GitHub Actions v1.0】完全無料システム稼働中✅"""
 

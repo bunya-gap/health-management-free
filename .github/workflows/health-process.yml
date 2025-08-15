@@ -111,31 +111,26 @@ jobs:
         
         # 変更があるかチェック
         if [[ -n $(git status --porcelain) ]]; then
-          echo "📝 変更ファイル検出 - 安全なコミット実行"
-          git add reports/ health_api_data/ 2>/dev/null || true
+          echo "📝 変更ファイル検出 - シンプルコミット実行"
           
-          # 変更がある場合のみコミット
-          if [[ -n $(git diff --cached) ]]; then
-            echo "🔄 リモート変更確認"
-            git fetch origin main
+          # 最新取得
+          git fetch origin main
+          
+          # 変更をステージング
+          git add reports/ health_api_data/
+          
+          # コミット実行
+          if git commit -m "📊 健康データ自動更新 - $(date '+%Y-%m-%d %H:%M:%S') [GitHub Actions]"; then
+            echo "✅ コミット成功"
             
-            # 安全なマージ処理
-            echo "📊 変更をコミット"
-            git commit -m "📊 健康データ自動更新 - $(date '+%Y-%m-%d %H:%M:%S') [GitHub Actions]"
-            
-            echo "🔄 リモートとマージ"
-            git pull --no-rebase origin main || {
-              echo "⚠️ マージ競合検出 - 解決実行"
-              git merge --abort 2>/dev/null || true
-              echo "🔧 競合解決: ローカル変更を優先"
+            # プッシュ実行（競合時は強制）
+            git push origin main || {
+              echo "⚠️ プッシュ失敗 - 強制プッシュ実行"
               git push origin main --force-with-lease
             }
-            
-            echo "📤 変更をプッシュ"
-            git push origin main
             echo "✅ データ自動保存完了"
           else
-            echo "📭 コミット対象の変更なし"
+            echo "⚠️ コミット失敗"
           fi
         else
           echo "📭 変更ファイルなし - コミットスキップ"

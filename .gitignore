@@ -48,3 +48,5 @@ Thumbs.db
 config.py
 *.key
 *.pem
+# Local Netlify folder
+.netlify

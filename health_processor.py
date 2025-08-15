@@ -82,16 +82,25 @@ class HAEDataConverter:
         """HAE JSONを日次データ行に変換"""
         try:
             logger.info("🔄 HAEデータ変換開始")
-            # HAEデータ形式対応: data は list で metrics は各要素に含まれる
-            data_list = hae_data.get('data', [])
-            logger.info(f"📊 データ項目数: {len(data_list)}")
             
-            # 最初のデータ項目を使用（複数ある場合は最新）
-            if not data_list:
-                raise ValueError("HAEデータが空です")
+            # 実際のHAEデータ形式確認
+            data = hae_data.get('data', {})
+            logger.info(f"📊 データタイプ確認: {type(data)}")
             
-            metrics = data_list[0]  # 最初のデータ項目を metrics として使用
-            logger.info(f"📊 処理対象データ: {metrics}")
+            # 実際のHAEデータ形式: {"data": {"metrics": [...]}}
+            if isinstance(data, dict) and 'metrics' in data:
+                metrics = data.get('metrics', [])
+                logger.info(f"📊 実HAEデータ形式: メトリクス数 {len(metrics)}")
+            
+            # テスト用簡単形式: {"data": [{"weight": 65.5, ...}]}
+            elif isinstance(data, list) and len(data) > 0:
+                metrics = data[0]  # 最初のデータ項目
+                logger.info(f"📊 テスト形式データ: {metrics}")
+            
+            else:
+                raise ValueError(f"未対応のHAEデータ形式: data={type(data)}")
+            
+            logger.info(f"📊 変換開始: メトリクス処理")
             
             # 基本行データ（Phase1修正版）
             daily_row = {
@@ -122,13 +131,12 @@ class HAEDataConverter:
                 'calculation_method': 'GITHUB_ACTIONS'
             }
             
-            # メトリクス変換（HAEデータ形式対応）
+            # メトリクス変換（実HAEデータ形式対応）
             converted_count = 0
             
-            # 新形式のHAEデータに対応（直接フィールドマッピング）
+            # テスト用直接フィールドマッピング形式
             if isinstance(metrics, dict) and 'weight' in metrics:
-                # 直接フィールドマッピング形式
-                logger.info("📊 新HAEデータ形式検出: 直接フィールドマッピング")
+                logger.info("📊 テスト形式データ検出: 直接フィールドマッピング")
                 
                 # 基本データマッピング
                 if 'date' in metrics:
@@ -143,9 +151,9 @@ class HAEDataConverter:
                 converted_count = len([k for k in ['weight', 'body_fat', 'muscle_mass'] if k in metrics])
                 logger.info(f"✅ 直接マッピング完了: {converted_count}個のフィールド")
                 
-            else:
-                # 従来のメトリクス形式
-                logger.info("📊 従来HAEデータ形式検出: メトリクス変換")
+            # 実際のHAEデータ形式: メトリクスリスト処理
+            elif isinstance(metrics, list):
+                logger.info("📊 実HAEデータ形式検出: メトリクスリスト処理")
                 for metric in metrics:
                     name = metric.get('name', '')
                     if name in self.METRIC_MAPPING:
@@ -163,6 +171,9 @@ class HAEDataConverter:
                             
                             converted_count += 1
                             logger.info(f"✅ {name} → {csv_column}: {daily_row[csv_column]}")
+                
+            else:
+                logger.error(f"❌ 未対応のメトリクス形式: {type(metrics)}")
             
             logger.info(f"🎯 変換完了: {converted_count}個のメトリクス")
             

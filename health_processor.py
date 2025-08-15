@@ -82,8 +82,16 @@ class HAEDataConverter:
         """HAE JSONを日次データ行に変換"""
         try:
             logger.info("🔄 HAEデータ変換開始")
-            metrics = hae_data.get('data', {}).get('metrics', [])
-            logger.info(f"📊 メトリクス数: {len(metrics)}")
+            # HAEデータ形式対応: data は list で metrics は各要素に含まれる
+            data_list = hae_data.get('data', [])
+            logger.info(f"📊 データ項目数: {len(data_list)}")
+            
+            # 最初のデータ項目を使用（複数ある場合は最新）
+            if not data_list:
+                raise ValueError("HAEデータが空です")
+            
+            metrics = data_list[0]  # 最初のデータ項目を metrics として使用
+            logger.info(f"📊 処理対象データ: {metrics}")
             
             # 基本行データ（Phase1修正版）
             daily_row = {
@@ -114,25 +122,47 @@ class HAEDataConverter:
                 'calculation_method': 'GITHUB_ACTIONS'
             }
             
-            # メトリクス変換（Phase1修正対応）
+            # メトリクス変換（HAEデータ形式対応）
             converted_count = 0
-            for metric in metrics:
-                name = metric.get('name', '')
-                if name in self.METRIC_MAPPING:
-                    csv_column = self.METRIC_MAPPING[name]
-                    data_points = metric.get('data', [])
-                    
-                    if data_points:
-                        latest_point = data_points[-1]
+            
+            # 新形式のHAEデータに対応（直接フィールドマッピング）
+            if isinstance(metrics, dict) and 'weight' in metrics:
+                # 直接フィールドマッピング形式
+                logger.info("📊 新HAEデータ形式検出: 直接フィールドマッピング")
+                
+                # 基本データマッピング
+                if 'date' in metrics:
+                    daily_row['date'] = metrics['date']
+                if 'weight' in metrics:
+                    daily_row['体重_kg'] = metrics['weight']
+                if 'body_fat' in metrics:
+                    daily_row['体脂肪率'] = metrics['body_fat']
+                if 'muscle_mass' in metrics:
+                    daily_row['筋肉量_kg'] = metrics['muscle_mass']
+                
+                converted_count = len([k for k in ['weight', 'body_fat', 'muscle_mass'] if k in metrics])
+                logger.info(f"✅ 直接マッピング完了: {converted_count}個のフィールド")
+                
+            else:
+                # 従来のメトリクス形式
+                logger.info("📊 従来HAEデータ形式検出: メトリクス変換")
+                for metric in metrics:
+                    name = metric.get('name', '')
+                    if name in self.METRIC_MAPPING:
+                        csv_column = self.METRIC_MAPPING[name]
+                        data_points = metric.get('data', [])
                         
-                        # 【Phase1修正】sleep_analysis専用処理
-                        if name == 'sleep_analysis':
-                            daily_row[csv_column] = latest_point.get('totalSleep')
-                        else:
-                            daily_row[csv_column] = latest_point.get('qty')
-                        
-                        converted_count += 1
-                        logger.info(f"✅ {name} → {csv_column}: {daily_row[csv_column]}")
+                        if data_points:
+                            latest_point = data_points[-1]
+                            
+                            # 【Phase1修正】sleep_analysis専用処理
+                            if name == 'sleep_analysis':
+                                daily_row[csv_column] = latest_point.get('totalSleep')
+                            else:
+                                daily_row[csv_column] = latest_point.get('qty')
+                            
+                            converted_count += 1
+                            logger.info(f"✅ {name} → {csv_column}: {daily_row[csv_column]}")
             
             logger.info(f"🎯 変換完了: {converted_count}個のメトリクス")
             

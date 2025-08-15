@@ -116,8 +116,20 @@ jobs:
           
           # 変更がある場合のみコミット
           if [[ -n $(git diff --cached) ]]; then
-            git commit -m "📊 健康データ自動更新 - $(date '+%Y-%m-%d %H:%M:%S') [GitHub Actions]"
-            git push
+            # リモート変更を取得・マージ
+            echo "🔄 リモート変更確認・マージ実行"
+            git fetch origin main
+            git rebase origin/main || {
+              echo "⚠️ リベース競合 - 強制プッシュ準備"
+              git rebase --abort
+              git reset --soft HEAD~1
+              git pull --rebase origin main
+              git add reports/ health_api_data/ 2>/dev/null || true
+              git commit -m "📊 健康データ自動更新 - $(date '+%Y-%m-%d %H:%M:%S') [GitHub Actions]" || true
+            }
+            
+            git commit -m "📊 健康データ自動更新 - $(date '+%Y-%m-%d %H:%M:%S') [GitHub Actions]" || echo "コミット済み"
+            git push origin main
             echo "✅ データ自動保存完了"
           else
             echo "📭 コミット対象の変更なし"

@@ -1,0 +1,21 @@
+{
+  "timestamp": "2025-08-20 03:39",
+  "system": "GitHub Actions v1.0",
+  "current_body_fat_rate": 17.2,
+  "target_body_fat_rate": 12.0,
+  "body_fat_progress": {
+    "7day_change": 0,
+    "14day_change": 0,
+    "28day_change": 0
+  },
+  "body_composition": {
+    "weight": 68.2,
+    "muscle_mass": 52.1,
+    "body_fat_mass": 11.7304
+  },
+  "calorie_balance": {
+    "current": -490.0,
+    "7day_avg": -686.3333333333334,
+    "14day_avg": -686.3333333333334
+  }
+}
